@@ -1,0 +1,26 @@
+{
+    "name": "phunkei/phunktheme",
+    "type": "library",
+    "description": "A wordpress theme class, meant to be extended",
+    "keywords": ["wordpress", "theme"],
+    "homepage": "http://github.com/phunkei/phunktheme",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Miguel Baltes Amado",
+            "email": "phunkei@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.2"
+    },
+    "autoload": {
+        "psr-0": {"Phunkei": "src/"}
+    },
+
+}
+
+
