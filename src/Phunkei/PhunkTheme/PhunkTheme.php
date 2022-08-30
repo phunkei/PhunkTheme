@@ -3,8 +3,7 @@ namespace Phunkei\PhunkTheme;
 use JasonGrimes\Paginator;
 class PhunkTheme {
 
-	protected $cfg;
-	public $cfgPath;
+	protected $vars;
 
 	protected $themeAddons;
 	protected $options;
@@ -76,16 +75,42 @@ class PhunkTheme {
 		}
 	}
 
-	public function loadCFG() {
-		$file = $this->cfgPath;
-		$cfg = parse_ini_file($file);
-		foreach($cfg as $key => $value) {
-			$this->cfg[$key] = $value;
-		}	
+	public function loadVariables() {
+		$src = [];
+		$parentThemeIni = get_template_directory() . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'theme.ini';
+		if(file_exists($parentThemeIni)) {
+			$src[] = $parentThemeIni;
+		}
+		if(get_stylesheet_directory() != get_template_directory()) {
+			$childThemeIni = get_stylesheet_directory() . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'theme.ini';
+			if(file_exists($childThemeIni)) {
+				$src[] = $childThemeIni;
+			}
+		}
+		$this->loadVariablesFromIni($src);
+	}
+
+	public function loadVariablesFromIni($src) {
+		$files = [];
+		if(!is_array($src)) {
+			$files[] = $src;
+		}
+		else {
+			$files = $src;
+		}
+		foreach($files as $file) {
+			if(!is_file($file)) {
+				throw new \Exception("File not found in $file");
+			}
+			$vars = parse_ini_file($file);
+			foreach($vars as $key => $value) {
+				$this->vars[$key] = $value;
+			}
+		}
 	}
 
 	public function getVar($key) {
-		return !empty($this->cfg[$key]) ? $this->cfg[$key] : null;
+		return !empty($this->vars[$key]) ? $this->vars[$key] : null;
 	}
 
 	public function options($key) {
