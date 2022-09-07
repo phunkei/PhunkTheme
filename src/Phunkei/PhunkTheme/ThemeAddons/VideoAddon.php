@@ -4,18 +4,26 @@ use Phunkei\PhunkTheme\ThemeAddons\ThemeAddon;
 
 class VideoAddon extends ThemeAddon {
 
-	public function __construct() {
+	private $tpl;
+
+	public function __construct($tpl = null) {
+		if($tpl) {
+			$this->tpl = $tpl;
+		}
+		else {
+			$tpl = 'template-parts/youtube.php';
+		}
 		add_shortcode('yt', [$this, 'addVideo']);
 	}
 
 	public function draw() {
-		echo $this->loadTemplate('template-parts/video-embed.php');
+		echo $this->loadTemplate($this->tpl);
 	}
 
 	public function addVideo($atts, $content) {
 		if(isset($atts['id'])) {
 			$id = $atts['id'];
-			return $this->loadTemplate('template-parts/youtube.php', ['id' => $id]);
+			return $this->loadTemplate($this->tpl, ['id' => $id]);
 		}
 		return;
 	}
