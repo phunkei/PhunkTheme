@@ -12,7 +12,7 @@ class ThemeAddon {
 		$path = explode("/", $path);
 		$path = implode(DIRECTORY_SEPARATOR, $path);
 		ob_start();
-		load_template(get_template_directory().DIRECTORY_SEPARATOR.$path, true, $args);
+		load_template(get_template_directory().DIRECTORY_SEPARATOR.$path, false, $args);
 		return ob_get_clean();
 	}
 }

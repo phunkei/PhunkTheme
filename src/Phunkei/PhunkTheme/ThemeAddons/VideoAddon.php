@@ -13,46 +13,95 @@ class VideoAddon extends ThemeAddon {
 		else {
 			throw new \Exception('No Video templates set.');
 		}
-		add_shortcode('yt', [$this, 'addVideo']);
+		add_shortcode('yt', [$this, 'addYoutubeShortCode']);
+		add_shortcode('vimeo', [$this, 'addVimeoShortCode']);
+		add_shortcode('video', [$this, 'addExternalVideoShortCode']);
 	}
 
 	public function draw() {
-		echo $this->loadTemplate($this->tpl);
 	}
 
-	public function addVideo($atts, $content) {
+	public function addExternalVideo($str) {
+		if(filter_var($str, FILTER_VALIDATE_URL)) {
+			return $this->addExternalVideoShortCode([], $str);
+		}
+		else {
+			return $this->addYoutubeById($str);
+		}
+	}
+
+	public function addExternalVideoShortCode($atts, $content) {
 		if(isset($atts['id'])) {
 			$id = $atts['id'];
-			return $this->loadTemplate($this->tpls['yt'], ['id' => $id]);
+			return $this->addYoutubeById($id);
 		}
-		else if (filter_var($content, FILTER_VALIDATE_URL)) {
+		if(filter_var($content, FILTER_VALIDATE_URL)) {
 			$parsedURL = parse_url( $content, PHP_URL_HOST );
 			if($parsedURL == "www.youtube.com") {
-				$parsedYT = parse_url( $content, PHP_URL_QUERY );
-				parse_str( $parsedYT, $videoVars );
-				if(count($videoVars)) {
-					if(!empty($videoVars['v'])) {
-						return $this->loadTemplate($this->tpls['yt'], ['id' => $videoVars['v']]);
-					}
-				}
+				$id = $this->getYoutubeIdByUrl($content);
+				return $this->addYoutubeById($id);
 			}
-			elseif($parsedURL == "vimeo.com") {
-				$parsedVimeo = parse_url( $content, PHP_URL_PATH );
-				$parsedVimeo = preg_replace('/\\/([0-9a-z]+)\\/([0-9a-z]+)/i', '$1?h=$2', $parsedVimeo);
-				return $this->loadTemplate($this->tpls['vimeo'], ['id' => $parsedVimeo]);
+			else if($parsedURL == "vimeo.com") {
+				$id = $this->getVimeoIdByUrl($content);
+				return $this->addVimeoById($id);
 			}
 		}
-		return;
+		return null;
 	}
 
-	public function YTToNoCookie($url) {
-		//https://www.youtube-nocookie.com/embed/SC52pr45ep8
-		//https://www.youtube.com/watch?v=tsa8biyxGPQ
-		return $url;
-		return preg_replace('/https:\/\/www\.youtube\.com\/watch\?v=/', 'https://www.youtube-nocookie.com/embed/', $url);
+	public function addYoutubeShortCode($atts, $content) {
+		if(isset($atts['id'])) {
+			$id = $atts['id'];
+			return $this->addYoutubeById($id);
+		}
+		else if (filter_var($content, FILTER_VALIDATE_URL)) {
+			$id = $this->getYoutubeIdByUrl($content);
+			if($id) {
+				$this->addYoutubeById($id);
+			}
+		}
+		return null;
 	}
 
-	public function getYTURLById($id) {
-		return "https://www.youtube-nocookie.com/embed/$id";
+	public function addVimeoShortCode($atts, $content) {
+		if(isset($atts['id'])) {
+			$id = $atts['id'];
+			return $this->addVimeoById($id);
+		}
+		else if (filter_var($content, FILTER_VALIDATE_URL)) {
+			$id = $this->getVimeoIdByUrl($content);
+			if($id) {
+				$this->addVimeoById($id);
+			}
+		}
+		return null;
+	}
+
+	public function getYoutubeIdByUrl($url) {
+		$parsedYT = parse_url( $url, PHP_URL_QUERY );
+		parse_str( $parsedYT, $videoVars );
+		if(count($videoVars)) {
+			if(!empty($videoVars['v'])) {
+				return $videoVars['v'];
+			}
+		}
+		return null;
+	}
+
+	public function getVimeoIdByUrl($url) {
+		$parsedVimeo = parse_url( $url, PHP_URL_PATH );
+		$parsedVimeo = preg_replace('/\\/([0-9a-z]+)\\/([0-9a-z]+)/i', '$1?h=$2', $parsedVimeo);
+		if($parsedVimeo) {
+			return $parsedVimeo;
+		}
+		return null;
+	}
+
+	public function addYoutubeById($id) {
+		return $this->loadTemplate($this->tpls['yt'], ['id' => $id]);
+	}
+
+	public function addVimeoById($id) {
+		return $this->loadTemplate($this->tpls['vimeo'], ['id' => $id]);
 	}
 }
