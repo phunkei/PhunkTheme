@@ -11,7 +11,7 @@ class VideoAddon extends ThemeAddon {
 			$this->tpls = $tpls;
 		}
 		else {
-			throw new \Exception('No Video templates set.')
+			throw new \Exception('No Video templates set.');
 		}
 		add_shortcode('yt', [$this, 'addVideo']);
 	}
