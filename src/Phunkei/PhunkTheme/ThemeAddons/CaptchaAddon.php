@@ -5,6 +5,7 @@ use Phunkei\PhunkTheme\ThemeAddons\ThemeAddon;
 class CaptchaAddon extends ThemeAddon {
 
 	const CHARS = '23459abcdefghijkmnpqrstuvwxyz123456789ABCDEFGHJKLMNPQRSTUVWYYZ';
+	const ACTION = 'getCaptcha';
 	public $options;
 
 	public function __construct($options = null) {
@@ -12,6 +13,9 @@ class CaptchaAddon extends ThemeAddon {
 		if($options) {
 			$this->setOptions($options);
 		}
+
+		add_action( 'wp_ajax_getCaptcha', [$this, 'ajaxGetCaptcha'] );
+		add_action( 'wp_ajax_nopriv_getCaptcha', [$this, 'ajaxGetCaptcha'] );
 	}
 
 	public function setOptions($options) {
@@ -58,7 +62,7 @@ class CaptchaAddon extends ThemeAddon {
 	}
 
 	public function setFont($font) {
-		$this->font = $font;
+		$this->options['font'] = $font;
 	}
 
 	public function getCaptcha($identifier, $length = 8, $w = 128, $h = 32) {
@@ -66,6 +70,23 @@ class CaptchaAddon extends ThemeAddon {
 		$this->persistCaptchaCode($identifier, $code);
 		$img = $this->createCaptchaImage($code, $w, $h);
 		return $img;
+	}
+
+	public function ajaxGetCaptcha() {
+		$identifier = $_POST['identifier'];
+		$length = $_POST['length'] ?? 8;
+		$w = $_POST['w'] ?? 128;
+		$h = $_POST['h'] ?? 32;
+
+		$code = $this->generateCaptchaCode($length);
+		$this->persistCaptchaCode($identifier, $code);
+		$img = $this->createCaptchaImage($code, $w, $h);
+		echo "data:image/png;base64,".$img;
+		exit;
+	}
+
+	public function getAjaxPath() {
+		return admin_url( 'admin-ajax.php' ) . '?action=' . self::ACTION;
 	}
 
 	public function createCaptchaImage($code, $w, $h) {
