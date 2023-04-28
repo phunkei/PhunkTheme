@@ -41,6 +41,10 @@ class VideoAddon extends ThemeAddon {
 				$id = $this->getYoutubeIdByUrl($content);
 				return $this->addYoutubeById($id);
 			}
+			else if($parsedURL == "youtu.be") {
+				$id = $this->getYoutubeBeIdByUrl($content);
+				return $this->addYoutubeById($id);
+			}
 			else if($parsedURL == "vimeo.com") {
 				$id = $this->getVimeoIdByUrl($content);
 				return $this->addVimeoById($id);
@@ -86,6 +90,12 @@ class VideoAddon extends ThemeAddon {
 			}
 		}
 		return null;
+	}
+
+	public function getYoutubeBeIdByUrl($url) {
+		$id = parse_url( $url, PHP_URL_PATH );
+		$id = str_replace("/", "", $id);
+		return $id;
 	}
 
 	public function getVimeoIdByUrl($url) {
